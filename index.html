@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Healthy working</title>
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+
+        <div class="container">
+
+            <nav class="navbar">
+                <a class="navbar-brand">
+                    <img src="./images/appicon.png" width="40" height="40">
+                </a>
+                <ul class="nav justify-content-end">
+                    <li class="nav-item">
+                        <button class="btn" title="About this app"><img src="./images/about_icon.png" width="20" height="20"></button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn" data-bs-toggle="modal" data-bs-target="#settings-pane" title="Settings"><img src="./images/settings_icon.png" width="20" height="20"></button>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="row">
+                <div class="col text-center">
+                    <img src="images/working.png" class="border border-success rounded border-5" height="100" width="100">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col text-center">
+                    <div style="position: relative; visibility: hidden;" class="margin">
+                        <video id="inputVideo" autoplay muted height="2"></video>
+                    </div>
+                    <div id="input-pane-holder"></div>
+                    <div id="volume-pane-holder"></div>
+                    <div id="button-pane-holder" class="mt-2"></div>
+                    <div id="settings-pane-holder" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/face-api.min.js"></script>
+        <script src="./renderer.js" type="module"></script>
+        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>
