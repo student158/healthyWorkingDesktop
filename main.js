@@ -1,7 +1,7 @@
 // main.js
 "use strict";
 
-const { app, BrowserWindow, ipcMain, Notification, Tray} = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, Tray, Menu} = require('electron');
 const fs = require('fs');
 const path = require('path')
 
@@ -39,7 +39,7 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html').then((result) => {
-    sendSettingsDataToUI();
+    // sendSettingsDataToUI();
   });
 
   // Open the DevTools.
@@ -54,6 +54,15 @@ function createWindow () {
         tray = new Tray("images/appicon.png");
       
         tray.setToolTip('Click to show the window');
+
+        const trayMenu = Menu.buildFromTemplate([
+          {label: 'Quit', 
+          type: 'normal', 
+          click: () => {
+            app.exit();
+          }}
+        ]);
+        tray.setContextMenu(trayMenu);
       
         tray.on('click', () => {
           mainWindow.show();

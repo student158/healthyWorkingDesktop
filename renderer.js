@@ -177,11 +177,19 @@ class SettingsPane extends HTMLElement {
                 <div>
                     <label for="default-work-time">Default worktime: </label>
                     <input type="text" id="default-work-time" value="25">
+                    <span>mins</span>
                 </div>
                 <div>
                     <label for="default-rest-time">Default rest time: </label>
                     <input type="text" id="default-rest-time" value="5">
+                    <span>mins</span>
                 </div>
+                <div>
+                    <label>Default volume: </label>
+                    <input type="text" class="default-volume-level" value="15">
+                    <span>%</span>
+                </div>
+                
                 <div>
                     <input type="checkbox" id="run-in-background-checkbox">
                     <label for="run-in-background-checkbox" class="ml-4">Run in background</label>
@@ -198,9 +206,15 @@ class SettingsPane extends HTMLElement {
     }
 
     loadAppSettings() {
-        const settings_string = localStorage.getItem("settings");
-        const settings = JSON.parse(settings_string);
-        return settings;
+        const previousSettings = localStorage.getItem("settings");
+        if (!previousSettings) {
+            localStorage.setItem("settings", `{"run_in_background": false, "run_in_startup": false}`);
+            return {run_in_background: false, run_in_startup: false};
+        }
+        else {
+            const settings = JSON.parse(previousSettings);
+            return settings;
+        }
     }
 
     /**Update settings data to the localStorage */
@@ -216,6 +230,23 @@ window.api.getSettingsDataFromMain((event, data) => {
     console.log("get settings from main, writen in UI");
     console.log(data);
 });
+
+/**
+ * 
+ * @return an object contains settings data
+ */
+function initializeSettingsFirstTime() {
+    const previousData = localStorage.getItem("testData");
+    if (!previousData) {
+        console.log({run_in_background: false, run_in_startup: false});
+    }
+    else {
+        console.log(previousData);
+    }
+}
+
+let settings;
+initializeSettingsFirstTime();
 
 const videoEl = document.getElementById('inputVideo');
 

@@ -75,10 +75,10 @@ export class TimeManager {
                 else {
                     this.timeOut ++;
                     console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
-                    if (this.standUpNotificationIsShown && !this.standUpNotificationDisappeared) {
+                    if (this.standUpNotificationIsShown && !this.standUpNotificationDisappeared && this.timeOut >= 5) {
                         setTimeout(() => {
                             this.hideStandUpNotification();
-                        }, 2000);
+                        }, 500);
                         this.standUpNotificationDisappeared = true;
                     }
                     if (this.timeOut >= this.sufficientRestTime) {
