@@ -18,6 +18,9 @@ export class TimeManager {
 
     faceDetectionModelFolderPath = "models";
 
+    sendOperationDataToDocumentEvent;
+    sendOperationDataToDocumentEventName = "fromTimeManager-sendData";
+
     // ID of setInterval method, use when stop the time manager
     timeManagerSessionId;
 
@@ -30,13 +33,14 @@ export class TimeManager {
     start() {
         this.timeManagerOperationState = "running";
         this.timeManagerSessionId = setInterval(async () => {
+            this.sendOperationDataToDocument();
             let faceDetections = await faceapi.detectAllFaces(this.webcamData);
             let faceIsDetected = faceDetections.length >= 1;
             if (this.state === "can-work") {
                 if (faceIsDetected) {
                     this.timeIn ++;
                     this.timeOut = 0;
-                    console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
+                    // console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
 
                     if (this.timeIn >= this.allowedWorkTime) {
                         this.state = "need-rest";
@@ -55,7 +59,7 @@ export class TimeManager {
                     }
                 } else {
                     this.timeOut ++;
-                    console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
+                    // console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
                     // can work is actually set the timeIn to 0. If healthy + rest enough -> timeIn 0 again
                     if (this.timeOut >= this.sufficientRestTime) {
                         this.timeIn = 0;
@@ -65,7 +69,7 @@ export class TimeManager {
             else { //when this.state is "need-rest"
                 if (faceIsDetected) {
                     this.timeIn ++;
-                    console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
+                    // console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
                     if (!this.standUpNotificationIsShown) {
                         this.showStandUpNotification();
                         this.standUpNotificationIsShown = true;
@@ -74,7 +78,7 @@ export class TimeManager {
                 } 
                 else {
                     this.timeOut ++;
-                    console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
+                    // console.log("time in: ", this.timeIn, "time out: ", this.timeOut);
                     if (this.standUpNotificationIsShown && !this.standUpNotificationDisappeared && this.timeOut >= 5) {
                         setTimeout(() => {
                             this.hideStandUpNotification();
@@ -103,6 +107,18 @@ export class TimeManager {
         this.standUpNotificationIsShown = false;
         this.canContinueNotificationIsShown = false;
         this.standUpNotificationDisappeared = false;
+    }
+
+    sendOperationDataToDocument() {
+        const data = {
+            state: this.state,
+            timeIn: this.timeIn,
+            timeOut: this.timeOut,
+            allowedWorkTime: this.allowedWorkTime,
+            sufficientRestTime: this.sufficientRestTime
+        }
+        this.sendOperationDataToDocumentEvent = new CustomEvent(this.sendOperationDataToDocumentEventName, {detail: data});
+        document.dispatchEvent(this.sendOperationDataToDocumentEvent);
     }
 
     /**allowedWorkTime: float, in secs */

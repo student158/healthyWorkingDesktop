@@ -1,6 +1,32 @@
 "use strict";
 import {TimeManager} from "./time-manager.js";
 
+class AppStatePane extends HTMLElement {
+    elapsedTimeLabel;
+    /**
+     * Show working image and state of the app, state can be "Ready", "Running"; show the elapsed time 
+     */
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.render();
+        this.elapsedTimeLabel = this.querySelector(".elapsed-time");
+    }
+
+    render() {
+        this.innerHTML = `
+<label class="elapsed-time"></label>
+        `
+    }
+
+    updateElapsedTime(data) {
+        this.elapsedTimeLabel.textContent = data;
+    }
+}
+customElements.define("app-state-pane", AppStatePane);
+
 class InputPane extends HTMLElement{
     workTimeInput;
     restTimeInput;
@@ -81,8 +107,6 @@ class ButtonPane extends HTMLElement {
         this.stopBtn = this.querySelector("#stop");
         this.startBtn.addEventListener('click', () => {
             document.dispatchEvent(this.startTimeManagerEvent);
-            this.stopBtn.removeAttribute("disabled");
-            this.startBtn.setAttribute("disabled", true);
         });
         this.stopBtn.addEventListener('click', () => {
             document.dispatchEvent(this.stopTimeManagerEvent);
@@ -96,6 +120,12 @@ class ButtonPane extends HTMLElement {
 <button id="start" class="btn btn-primary">Start</button>
 <button id="stop" class="btn btn-danger" disabled>Stop</button>
         `
+    }
+
+    /**Disable start button and activate stop button */
+    disableStartButton() {
+        this.stopBtn.removeAttribute("disabled");
+        this.startBtn.setAttribute("disabled", true);
     }
 }
 customElements.define("button-pane", ButtonPane);
@@ -179,18 +209,18 @@ class SettingsPane extends HTMLElement {
                     <input type="text" id="default-work-time" value="25">
                     <span>mins</span>
                 </div>
-                <div>
+                <div class="mt-2">
                     <label for="default-rest-time">Default rest time: </label>
                     <input type="text" id="default-rest-time" value="5">
                     <span>mins</span>
                 </div>
-                <div>
+                <div class="mt-2">
                     <label>Default volume: </label>
                     <input type="text" class="default-volume-level" value="15">
                     <span>%</span>
                 </div>
                 
-                <div>
+                <div class="mt-2">
                     <input type="checkbox" id="run-in-background-checkbox">
                     <label for="run-in-background-checkbox" class="ml-4">Run in background</label>
                 </div>
@@ -206,15 +236,9 @@ class SettingsPane extends HTMLElement {
     }
 
     loadAppSettings() {
-        const previousSettings = localStorage.getItem("settings");
-        if (!previousSettings) {
-            localStorage.setItem("settings", `{"run_in_background": false, "run_in_startup": false}`);
-            return {run_in_background: false, run_in_startup: false};
-        }
-        else {
-            const settings = JSON.parse(previousSettings);
-            return settings;
-        }
+        const settingsString = localStorage.getItem("settings");
+        const settings = JSON.parse(settingsString);
+        return settings;
     }
 
     /**Update settings data to the localStorage */
@@ -225,30 +249,29 @@ class SettingsPane extends HTMLElement {
 }
 customElements.define("settings-pane", SettingsPane);
 
-let appSettings;
 window.api.getSettingsDataFromMain((event, data) => {
     console.log("get settings from main, writen in UI");
     console.log(data);
 });
 
-/**
- * 
- * @return an object contains settings data
- */
 function initializeSettingsFirstTime() {
-    const previousData = localStorage.getItem("testData");
+    const previousData = localStorage.getItem("settings");
     if (!previousData) {
-        console.log({run_in_background: false, run_in_startup: false});
-    }
-    else {
-        console.log(previousData);
+        localStorage.setItem("settings", `{"run_in_background": false, "run_in_startup": false, default_work_time: 25, default_rest_time: 5, default_volume: 15}`);
     }
 }
-
-let settings;
 initializeSettingsFirstTime();
 
+const aboutButton = document.querySelector(".about-btn");
+aboutButton.addEventListener("click", () => {
+    window.api.showAboutWindow();
+});
+
 const videoEl = document.getElementById('inputVideo');
+
+const appStatePaneHolder = document.querySelector("#app-state-pane-holder");
+const appStatePane = new AppStatePane();
+appStatePaneHolder.appendChild(appStatePane);
 
 const inputPaneHolder = document.querySelector("#input-pane-holder");
 const inputPane = new InputPane();
@@ -279,6 +302,7 @@ document.addEventListener(buttonPane.startTimeManagerEventName, () => {
         const restTime = inputPane.getRestTimeInput();
         timeManager.setAllowedWorkTime(workTime*60);
         timeManager.setSufficientRestTime(restTime*60);
+        buttonPane.disableStartButton();
         startTimeManager();
     }
     else {
@@ -299,6 +323,11 @@ document.addEventListener(volumePane.changeVolumeEventName, (e) => {
 document.addEventListener(settingsPane.updateAppSettingsEventName, (e) => {
     const appSettings = e.detail;
     window.api.updateAppSettings(appSettings);
+});
+document.addEventListener(timeManager.sendOperationDataToDocumentEventName, (event) => {
+    const data = event.detail;
+    const elapsedTime = data.timeIn;
+    appStatePane.updateElapsedTime(elapsedTime);
 });
 
 async function startTimeManager() {

@@ -1,7 +1,7 @@
 // main.js
 "use strict";
 
-const { app, BrowserWindow, ipcMain, Notification, Tray, Menu} = require('electron');
+const { app, BrowserWindow, ipcMain, Notification, Tray, Menu, shell} = require('electron');
 const fs = require('fs');
 const path = require('path')
 
@@ -43,7 +43,7 @@ function createWindow () {
   });
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   mainWindow.on("close", (e) => {
     if (runInBackground) {
@@ -69,6 +69,22 @@ function createWindow () {
         });
       }
     }
+  });
+}
+
+function createAboutWindow() {
+  const aboutWindow = new BrowserWindow({
+    title: "About",
+    autoHideMenuBar: true,
+	  width: 868,
+    icon: path.join(__dirname, 'images/appicon.png'),
+	  height: 489,
+  });
+  aboutWindow.loadFile("about.html").then(() => {
+    aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    });
   });
 }
 
@@ -99,16 +115,20 @@ app.on('window-all-closed', function () {
 ////   Connection with the UI
 /////////////////////////////////////
 
+ipcMain.on("show_about_window", () => {
+    createAboutWindow();
+});
+
 ipcMain.on("show_standup_notification", () => {
     console.log("main process received signal!");
-    const subtitle = "(Auto disappear when user leaves table)"
+    const subtitle = "(Auto hide when user leaves table)"
     standUpNotification = new Notification({title: "⚠ You should stand up!!!", body: subtitle, icon: "./images/exercise.png", timeoutType: "never"});
     standUpNotification.show();
 }); 
 
 ipcMain.on("show_can_work_notification", () => {
     console.log("trigger show_can_work_noti in main");
-    const subtitle = "(Auto disappear when user continues working)"
+    const subtitle = "(Auto hide when user continues working)"
     canWorkNotification = new Notification({title: "✔ You can continue working!", body: subtitle, icon: "./images/working.png", timeoutType: "never"});
     canWorkNotification.show();
 });
