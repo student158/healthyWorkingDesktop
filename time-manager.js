@@ -93,7 +93,7 @@ export class TimeManager {
                     }
                 }
             }
-        }, 900);
+        }, 1000);
     }
 
     /**Stop and reset all the variables */

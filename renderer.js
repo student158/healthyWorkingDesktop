@@ -3,6 +3,8 @@ import {TimeManager} from "./time-manager.js";
 
 class AppStatePane extends HTMLElement {
     elapsedTimeLabel;
+    workTime;
+    appSettings;
     /**
      * Show working image and state of the app, state can be "Ready", "Running"; show the elapsed time 
      */
@@ -17,12 +19,25 @@ class AppStatePane extends HTMLElement {
 
     render() {
         this.innerHTML = `
-<label class="elapsed-time"></label>
+<label class="elapsed-time">Elapsed work time: -- / -- mins ( -- %)</label>
         `
     }
 
+    /**
+     * 
+     * @param {Object} data {workTime: number, elapsedTime: number, elapsedPercentage: number}
+     */
     updateElapsedTime(data) {
-        this.elapsedTimeLabel.textContent = data;
+        const workTime = data.workTime.toFixed(2);
+        const elapsedTime = data.elapsedTime.toFixed(2);
+        const elapsedPercentage = data.elapsedPercentage.toFixed(2);
+        this.elapsedTimeLabel.textContent = `Elapsed work time: ${elapsedTime} / ${workTime} mins ( ${elapsedPercentage} %)`;
+    }
+
+    loadAppSettings() {
+        const settingsString = localStorage.getItem("settings");
+        const settings = JSON.parse(settingsString);
+        return settings;
     }
 }
 customElements.define("app-state-pane", AppStatePane);
@@ -257,7 +272,7 @@ window.api.getSettingsDataFromMain((event, data) => {
 function initializeSettingsFirstTime() {
     const previousData = localStorage.getItem("settings");
     if (!previousData) {
-        localStorage.setItem("settings", `{"run_in_background": false, "run_in_startup": false, default_work_time: 25, default_rest_time: 5, default_volume: 15}`);
+        localStorage.setItem("settings", `{"run_in_background": false, "run_in_startup": false, "default_work_time": 25, "default_rest_time": 5, "default_volume": 15}`);
     }
 }
 initializeSettingsFirstTime();
@@ -326,8 +341,10 @@ document.addEventListener(settingsPane.updateAppSettingsEventName, (e) => {
 });
 document.addEventListener(timeManager.sendOperationDataToDocumentEventName, (event) => {
     const data = event.detail;
-    const elapsedTime = data.timeIn;
-    appStatePane.updateElapsedTime(elapsedTime);
+    const workTime = data.allowedWorkTime/60;
+    const elapsedTime = data.timeIn/60;
+    const elapsedPercentage = elapsedTime/workTime*100;
+    appStatePane.updateElapsedTime({workTime: workTime, elapsedTime: elapsedTime, elapsedPercentage: elapsedPercentage});
 });
 
 async function startTimeManager() {
