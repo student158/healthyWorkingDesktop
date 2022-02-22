@@ -19,12 +19,12 @@ Features
 
 <img src="misc/settings.png" alt="settings pane" width="150" height="150"/>
 
-* Toast and sound notification: Toast notification helpful when you watch Youtube or listening music.
+* Toast and sound notification: Toast notification is helpful when you watch Youtube or listening music.
 <img src="misc/standup-noti.png" alt="toast notification notify user to stand up" width="auto" height="150"/>
 <img src="misc/canwork-noti.png" alt="toast notification notify user can continue working" width="auto" height="150"/>
 
 
-Run in your local machine
+Run in your machine
 ----------
 Just pull the repo and run the following
 ```
