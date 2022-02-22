@@ -13,7 +13,7 @@ Features
 
 ![tray_icon](misc/tray.png) 
 * Set your preference time for sitting and resting.
-![settings pane](misc/settings.png)
+![settings pane](misc/settings.png =300x300)
 * Toast and sound notification: Toast notification helpful when you watch Youtube or listening music.
 ![toast notification notify user to stand up](misc/standup-noti.png)
 ![toast notification notify user can continue working](misc/canwork-noti.png)
