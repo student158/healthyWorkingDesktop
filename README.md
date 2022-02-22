@@ -23,6 +23,16 @@ Features
 <img src="misc/standup-noti.png" alt="toast notification notify user to stand up" width="auto" height="150"/>
 <img src="misc/canwork-noti.png" alt="toast notification notify user can continue working" width="auto" height="150"/>
 
+
+Run in your local machine
+----------
+Just pull the repo and run the following
+```
+npm install
+
+npm start
+```
+
 Credits
 ---------
 Images and icons used in the app:
@@ -33,15 +43,6 @@ Images and icons used in the app:
     <li><a href="https://www.irasutoya.com/2018/11/blog-post_184.html" target="_blank">Exercise illustration</a></li>
     <li><a href="https://www.irasutoya.com/2013/10/blog-post_6464.html" target="_blank">Working illustration</a></li>
 </ul>
-
-Run in your local machine
-----------
-Just pull the repo and run the following
-```
-npm install
-
-npm start
-```
 
 License
 ---------
