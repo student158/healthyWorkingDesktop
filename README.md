@@ -10,6 +10,7 @@ Features
 ---------
 
 * Run in background mode: The app will minimize to the tray icon.
+
 ![tray_icon](misc/tray.png) 
 * Set your preference time for sitting and resting.
 ![settings pane](misc/settings.png)
