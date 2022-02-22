@@ -43,10 +43,11 @@ class AppStatePane extends HTMLElement {
 customElements.define("app-state-pane", AppStatePane);
 
 class InputPane extends HTMLElement{
+    appSettings = this.loadAppSettings();
     workTimeInput;
     restTimeInput;
-    defaultWorkTime = 25;
-    defaultRestTime = 5;
+    defaultWorkTime = this.appSettings.default_work_time;
+    defaultRestTime = this.appSettings.default_rest_time;
 
     /**Contain 2 inputs for work time and rest time */
     constructor() {
@@ -100,6 +101,22 @@ class InputPane extends HTMLElement{
         const restTimeIsValid = (!isNaN(parseFloat(restTimeInput)) && parseFloat(restTimeInput)) || restTimeInput === "";
         return workTimeIsValid && restTimeIsValid;
     }
+
+    loadAppSettings() {
+        const settingsString = localStorage.getItem("settings");
+        const settings = JSON.parse(settingsString);
+        // console.log("Initial settings: ", settings);
+        return settings;
+    }
+
+    /**Update the default time value and the placeholder in input */
+    updateDefaultTime() {
+        this.appSettings = this.loadAppSettings();
+        this.defaultWorkTime = this.appSettings.default_work_time;
+        this.defaultRestTime = this.appSettings.default_rest_time;
+        this.workTimeInput.placeholder = `default ${this.defaultWorkTime} mins`;
+        this.restTimeInput.placeholder = `default ${this.defaultRestTime} mins`;
+    }
 }
 customElements.define("input-pane", InputPane);
 
@@ -146,8 +163,9 @@ class ButtonPane extends HTMLElement {
 customElements.define("button-pane", ButtonPane);
 
 class VolumeControlPane extends HTMLElement {
+    appSettings = this.loadAppSettings();
     volumeSlider;
-    currentVolumeValue = 15;
+    currentVolumeValue = this.appSettings.default_volume;
     changeVolumeEventName = "fromVolumeControlPane-changeVolume";
     changeVolumeEvent;
 
@@ -161,7 +179,7 @@ class VolumeControlPane extends HTMLElement {
         this.volumeSlider = this.querySelector("#volume-slider");
         const volumeValue = this.querySelector("#volume-value");
         // update the value display when move the slider
-        this.volumeSlider.oninput = () => {
+        this.volumeSlider.oninput = async () => {
             volumeValue.textContent = this.volumeSlider.value + " %";
             const volumeData = parseFloat(this.volumeSlider.value);
             this.changeVolumeEvent = new CustomEvent(this.changeVolumeEventName, {detail: volumeData});
@@ -176,15 +194,36 @@ class VolumeControlPane extends HTMLElement {
 <span id="volume-value">${this.currentVolumeValue} %</span>
         `;
     }
+
+    loadAppSettings() {
+        const settingsString = localStorage.getItem("settings");
+        const settings = JSON.parse(settingsString);
+        // console.log("Initial settings: ", settings);
+        return settings;
+    }
 }
 customElements.define("volume-control-pane", VolumeControlPane);
 
 class SettingsPane extends HTMLElement {
-    runInBackgroundCheckBox;
-    runInBackground;
+    appSettings = this.loadAppSettings();
+    runInBackground = this.appSettings.run_in_background;
+    defaultWorkTime = this.appSettings.default_work_time;
+    defaultRestTime = this.appSettings.default_rest_time;
+    defaultVolume = this.appSettings.default_volume;
     runInStartup;
+
     updateAppSettingsEventName = "fromSettingsPane-updateAppSettings";
     updateAppSettingsEvent;
+
+    settingsForm;
+    defaultWorkTimeInput;
+    defaultRestTimeInput;
+    defaultVolumeInput;
+    runInBackgroundCheckBox;
+    saveChangesBtn;
+    closeBtn;
+    crossCloseBtn;
+    settingsModal;
 
     constructor() {
         super();
@@ -192,82 +231,119 @@ class SettingsPane extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        this.settingsForm = this.querySelector(".settings-form");
+        this.defaultWorkTimeInput = this.querySelector(".default-work-time");
+        this.defaultRestTimeInput = this.querySelector(".default-rest-time");
+        this.defaultVolumeInput = this.querySelector(".default-volume");
+        this.saveChangesBtn = this.querySelector(".save-changes-btn");
+        this.closeBtn = this.querySelector(".close-btn");
+        this.crossCloseBtn = this.querySelector(".cross-close-btn");
         this.runInBackgroundCheckBox = this.querySelector("#run-in-background-checkbox");
-        // load settings first time
-        const settings = this.loadAppSettings();
-        this.runInBackground = settings.run_in_background;
-        if (this.runInBackground) {
-            this.runInBackgroundCheckBox.setAttribute("checked", "true");
-        }
+        this.settingsModal = new bootstrap.Modal(this.querySelector('#settings-pane'), {keyboard: false});
 
-        this.runInBackgroundCheckBox.addEventListener("click", async () => {
-            const isChecked = this.runInBackgroundCheckBox.checked;
-            const appSettings = {run_in_background: isChecked, run_in_startup: false};
-            this.updateAppSettings(appSettings);
-            this.updateAppSettingsEvent = new CustomEvent(this.updateAppSettingsEventName, {detail: appSettings});
-            document.dispatchEvent(this.updateAppSettingsEvent);
+        this.populateDefaultInput();
+
+        this.closeBtn.addEventListener("click", () => {
+            this.populateDefaultInput();
+        });
+
+        this.crossCloseBtn.addEventListener("click", () => {
+            this.populateDefaultInput();
+        });
+
+        this.settingsForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            this.updateAppSettings();
+            this.settingsModal.hide();
+
         });
     }
 
     render() {
         this.innerHTML = `
-<div class="modal fade" id="settings-pane" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="settings-pane" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close cross-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div>
-                    <label for="default-work-time">Default worktime: </label>
-                    <input type="text" id="default-work-time" value="25">
-                    <span>mins</span>
+            <form class="settings-form">
+                <div class="modal-body">
+                    <div>
+                        <label for="default-work-time">Default work time: </label>
+                        <input type="number" min="1" class="default-work-time" value="${this.defaultWorkTime}" required>
+                        <span>mins</span>
+                    </div>
+                    <div class="mt-2">
+                        <label for="default-rest-time">Default rest time: </label>
+                        <input type="number" min="1" required class="default-rest-time" value="${this.defaultRestTime}">
+                        <span>mins</span>
+                    </div>
+                    <div class="mt-2">
+                        <label>Default volume: </label>
+                        <input type="number" min="0" max="100" required class="default-volume" value="${this.defaultVolume}">
+                        <span>%</span>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <input type="checkbox" id="run-in-background-checkbox">
+                        <label for="run-in-background-checkbox" class="ml-4">Run in background</label>
+                    </div>
                 </div>
-                <div class="mt-2">
-                    <label for="default-rest-time">Default rest time: </label>
-                    <input type="text" id="default-rest-time" value="5">
-                    <span>mins</span>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-btn" data-bs-dismiss="modal">Close</button>
+                    <input class="btn btn-primary save-changes-btn" type="submit" value="Save changes">
                 </div>
-                <div class="mt-2">
-                    <label>Default volume: </label>
-                    <input type="text" class="default-volume-level" value="15">
-                    <span>%</span>
-                </div>
-                
-                <div class="mt-2">
-                    <input type="checkbox" id="run-in-background-checkbox">
-                    <label for="run-in-background-checkbox" class="ml-4">Run in background</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
         `;
     }
 
+    /**When user want to change settings but not save -> use old settings and repolulate the input */
+    populateDefaultInput() {
+        this.defaultWorkTimeInput.value = this.appSettings.default_work_time;
+        this.defaultRestTimeInput.value = this.appSettings.default_rest_time;
+        this.defaultVolumeInput.value = this.appSettings.default_volume;
+        const run_in_background = this.appSettings.run_in_background;
+        if (run_in_background) {
+            this.runInBackgroundCheckBox.checked = true;
+        }
+        else {
+            this.runInBackgroundCheckBox.checked = false;
+        }
+    }
+
+    /**Return object of app settings */
     loadAppSettings() {
         const settingsString = localStorage.getItem("settings");
         const settings = JSON.parse(settingsString);
+        // console.log("Initial settings: ", settings);
         return settings;
     }
 
     /**Update settings data to the localStorage */
-    updateAppSettings(settingsData) {
-        localStorage.settings = JSON.stringify(settingsData);
+    async updateAppSettings() {
+        const defaultWorkTimeInputValue = Number(this.defaultWorkTimeInput.value);
+        const defaultRestTimeInputValue = Number(this.defaultRestTimeInput.value);
+        const defaultVolumeInputValue = Number(this.defaultVolumeInput.value);
+        const isRunInBackground = this.runInBackgroundCheckBox.checked;
+        this.appSettings.default_work_time = defaultWorkTimeInputValue;
+        this.appSettings.default_rest_time = defaultRestTimeInputValue;
+        this.appSettings.default_volume = defaultVolumeInputValue;
+        this.appSettings.run_in_background = isRunInBackground;
+
+        localStorage.settings = JSON.stringify(this.appSettings);
+
+        this.updateAppSettingsEvent = new CustomEvent(this.updateAppSettingsEventName, {detail: this.appSettings});
+        document.dispatchEvent(this.updateAppSettingsEvent);
+        // console.log(localStorage);
     }
 
 }
 customElements.define("settings-pane", SettingsPane);
-
-window.api.getSettingsDataFromMain((event, data) => {
-    console.log("get settings from main, writen in UI");
-    console.log(data);
-});
 
 function initializeSettingsFirstTime() {
     const previousData = localStorage.getItem("settings");
@@ -336,6 +412,7 @@ document.addEventListener(volumePane.changeVolumeEventName, (e) => {
     timeManager.changeVolume(volumeValue);
 });
 document.addEventListener(settingsPane.updateAppSettingsEventName, (e) => {
+    inputPane.updateDefaultTime();
     const appSettings = e.detail;
     window.api.updateAppSettings(appSettings);
 });

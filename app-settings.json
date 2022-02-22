@@ -1,4 +1,7 @@
 {
-  "run_in_background": true,
-  "run_in_startup": false
+  "run_in_background": false,
+  "run_in_startup": false,
+  "default_work_time": 25,
+  "default_rest_time": 5,
+  "default_volume": 15
 }

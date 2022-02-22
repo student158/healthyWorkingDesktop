@@ -144,8 +144,16 @@ ipcMain.on("hide_standup_notification", () => {
 });
 
 ipcMain.on("update_app_settings", (event, data) => {
+    // console.log(data);
+    // {
+    //   run_in_background: false,
+    //   run_in_startup: false,
+    //   default_work_time: 25,
+    //   default_rest_time: 5,
+    //   default_volume: 15
+    // }
     runInBackground = data.run_in_background;
-
+    // console.log("run in background: ", runInBackground);
     // save settings data to file
     let dataJSON = JSON.stringify(data, null, 2);
     fs.writeFile("app-settings.json", dataJSON, (err) => {
