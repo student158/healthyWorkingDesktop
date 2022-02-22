@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Healthy working</title>
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-        <link href="css/style.css" rel="stylesheet" type="text/css">
+        <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="./css/style.css" rel="stylesheet" type="text/css">
     </head>
     <body>
 
@@ -13,22 +13,22 @@
             <!--Navigation bar with settings, about icon-->
             <nav class="navbar">
                 <a class="navbar-brand">
-                    <img src="./images/appicon.png" width="40" height="40">
+                    <img src="../assets/images/appicon.png" width="40" height="40">
                 </a>
                 <ul class="nav justify-content-end">
                     <li class="nav-item">
-                        <button class="btn about-btn" title="About this app"><img src="./images/about_icon.png" width="20" height="20"></button>
+                        <button class="btn about-btn" title="About this app"><img src="../assets/images/about_icon.png" width="20" height="20"></button>
                     </li>
                     <!--The "#settings-pane" is in the renderer.js, not clean here-->
                     <li class="nav-item">
-                        <button class="btn settings-btn" data-bs-toggle="modal" data-bs-target="#settings-pane" title="Settings"><img src="./images/settings_icon.png" width="20" height="20"></button>
+                        <button class="btn settings-btn" data-bs-toggle="modal" data-bs-target="#settings-pane" title="Settings"><img src="../assets/images/settings_icon.png" width="20" height="20"></button>
                     </li>
                 </ul>
             </nav>
 
             <div class="row">
                 <div class="col text-center">
-                    <img src="images/working.png" class="border border-success rounded border-5" height="100" width="100">
+                    <img src="../assets/images/working.png" class="border border-success rounded border-5" height="100" width="100">
                     <div id="app-state-pane-holder"></div>
                 </div>
             </div>
@@ -46,8 +46,8 @@
             </div>
         </div>
 
-        <script src="js/face-api.min.js"></script>
+        <script src="./face-api/face-api.min.js"></script>
         <script src="./renderer.js" type="module"></script>
-        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="./bootstrap/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

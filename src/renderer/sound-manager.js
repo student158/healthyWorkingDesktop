@@ -1,5 +1,5 @@
 export class SoundManager {
-    standUpSound = new Audio("sound/stand.mp3");
+    standUpSound = new Audio("../assets/sound/stand.mp3");
     
     constructor() {
         this.standUpSound.volume = 0.15; // set 15% by default

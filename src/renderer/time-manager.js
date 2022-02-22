@@ -16,7 +16,7 @@ export class TimeManager {
     // after the app notify, if the user stand up and move outside -> change to true
     standUpNotificationDisappeared = false;
 
-    faceDetectionModelFolderPath = "models";
+    faceDetectionModelFolderPath = "face-api/models";
 
     sendOperationDataToDocumentEvent;
     sendOperationDataToDocumentEventName = "fromTimeManager-sendData";
