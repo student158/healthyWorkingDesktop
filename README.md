@@ -16,15 +16,25 @@ Features
 
 * Run in background mode: The app will minimize to the tray icon.
 
-![tray_icon](misc/tray.png) 
+<p align="center">
+<img src="misc/tray.png" alt="application screenshot" width="75" height="100"/>
+</p>
+
 * Set your preference time for sitting and resting.
 
+<p align="center">
 <img src="misc/settings.png" alt="settings pane" width="150" height="150"/>
+</p>
 
 * Toast and sound notification: Toast notification is helpful when you watch Youtube or listening music.
-<img src="misc/standup-noti.png" alt="toast notification notify user to stand up" width="auto" height="150"/>
-<img src="misc/canwork-noti.png" alt="toast notification notify user can continue working" width="auto" height="150"/>
 
+<p align="center">
+<img src="misc/standup-noti.png" alt="toast notification notify user to stand up" width="auto" height="150"/>
+</p>
+
+<p align="center">
+<img src="misc/canwork-noti.png" alt="toast notification notify user can continue working" width="auto" height="150"/>
+</p>
 
 Run in your machine
 ----------
